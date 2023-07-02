@@ -17,7 +17,7 @@
         :default-active="activePath"
       >
         <!-- 引入组件 -->
-        <menu-tree :menuData="menuList"></menu-tree>
+        <menu-tree :isCollapse="isCollapse" :menuData="menuList"></menu-tree>
         <!-- <el-submenu
           :index="item.id + ''"
           v-for="item in menuList"
@@ -76,7 +76,7 @@ export default {
   data() {
     return {
       isCollapse: false,
-      activePath: "",
+      activePath: "c",
       menuList: [
         {
           path: "/a",
@@ -95,9 +95,9 @@ export default {
               component: () => import("@/views/AboutView.vue"),
               children: [
                 {
-                  path: "a",
-                  name: "a",
-                  id: "2",
+                  path: "c",
+                  name: "c",
+                  id: "4",
                   authName: "a1",
                   icon: "el-icon-phone",
                   component: () => import("@/views/AboutView.vue"),
@@ -118,14 +118,14 @@ export default {
     };
   },
   mounted() {
-    this.activePath = window.sessionStorage.getItem("activePath");
+    // this.activePath = window.sessionStorage.getItem("activePath");
   },
   methods: {
     toggle() {
       this.isCollapse = !this.isCollapse;
     },
     saveState(activePath) {
-      window.sessionStorage.setItem("activePath", activePath);
+      // window.sessionStorage.setItem("activePath", activePath);
       this.activePath = activePath;
     },
   },
@@ -140,6 +140,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
+    white-space: nowrap;
     img {
       width: 36px;
       height: 36px;
