@@ -7,15 +7,14 @@
       class="login-form"
       autocomplete="on"
       label-position="left"
+      label-width="50px"
     >
-      <div class="title-container">
-        <h3 class="title">Login Form</h3>
-      </div>
-
-      <el-form-item prop="username">
-        <span class="svg-container">
-          <svg-icon icon-class="user" />
-        </span>
+      <el-form-item>
+        <div class="login-form-title">
+          <h3 class="title">Login Form</h3>
+        </div>
+      </el-form-item>
+      <el-form-item prop="username" label="账号">
         <el-input
           ref="username"
           v-model="loginForm.username"
@@ -27,10 +26,7 @@
         />
       </el-form-item>
 
-      <el-form-item prop="password">
-        <span class="svg-container">
-          <svg-icon icon-class="password" />
-        </span>
+      <el-form-item prop="password" label="密码">
         <el-input
           :key="passwordType"
           ref="password"
@@ -42,23 +38,30 @@
           autocomplete="on"
           @keyup.enter.native="handleLogin"
         />
-        <span class="show-pwd" @click="showPwd">
-          <svg-icon
-            :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'"
+        <span class="show-pwd" @click="handleChangePwdIcon">
+          <i
+            :class="
+              passwordType === 'password' ? 'el-icon-lock' : 'el-icon-unlock'
+            "
           />
         </span>
       </el-form-item>
-      <el-button
-        :loading="loading"
-        type="primary"
-        style="width: 100%; margin-bottom: 30px"
-        @click.native.prevent="handleLogin"
-        >登录</el-button
-      >
+      <el-form-item>
+        <el-button
+          :loading="loginLoading"
+          type="primary"
+          style="width: 100%; margin-bottom: 30px"
+          @click.native.prevent="handleLogin"
+          >登录</el-button
+        >
+      </el-form-item>
     </el-form>
   </div>
 </template>
 <script>
+import { login } from "@/api/api";
+import { CANEAL_TOCKEN_STATUS } from "@/utils/const.js";
+
 export default {
   name: "Login",
   components: {},
@@ -84,42 +87,51 @@ export default {
       },
       loginRules: {
         username: [
-          { required: true, trigger: "blur", validator: validateUsername },
+          { required: true, trigger: "change", validator: validateUsername },
         ],
         password: [
-          { required: true, trigger: "blur", validator: validatePassword },
+          { required: true, trigger: "change", validator: validatePassword },
         ],
       },
-      loading: false,
+      loginLoading: false,
       passwordType: "password",
     };
   },
+  mounted() {},
   methods: {
     handleLogin() {
-      this.$refs.loginForm.validate((valid) => {
+      this.$refs.loginForm.validate(async (valid) => {
         if (valid) {
-          this.loading = true;
-          console.log("结果=>", this.loginForm);
+          this.loginLoading = true;
 
-          if (
-            this.loginForm.username == "zpgong" &&
-            this.loginForm.password == 123
-          ) {
-            localStorage.setItem("status", 1);
-            this.$router.push(this.$route.query.redirect || "/home");
-            this.loading = false;
+          const req = {
+            username: this.loginForm.username,
+            password: this.loginForm.password,
+          };
+          let resp;
 
+          try {
+            resp = await login(req);
+          } catch (error) {
+            if (error.status !== CANEAL_TOCKEN_STATUS) {
+              this.$message.error(error);
+            }
+            this.loginLoading = false;
             return;
           }
-          console.log("结果=>", "密码错误");
+          console.log("login resp=>", resp);
 
-          this.loading = false;
+          // 请求登录成功
+          this.$store.commit("updateUserInfo", resp.user_info);
+          this.$store.commit("updatetoken", resp.token);
+          this.$router.push(this.$route.query.redirect || "/home");
+          this.loginLoading = false;
         } else {
           return false;
         }
       });
     },
-    showPwd() {
+    handleChangePwdIcon() {
       if (this.passwordType === "password") {
         this.passwordType = "";
       } else {
@@ -146,60 +158,27 @@ export default {
     padding: 160px 35px 0;
     margin: 0 auto;
     overflow: hidden;
-  }
+    .login-form-title {
+      position: relative;
 
-  .tips {
-    font-size: 14px;
-    color: #fff;
-    margin-bottom: 10px;
-
-    span {
-      &:first-of-type {
-        margin-right: 16px;
+      .title {
+        font-size: 26px;
+        color: #eee;
+        margin: 0px auto 40px auto;
+        text-align: center;
+        font-weight: bold;
       }
-    }
-  }
-
-  .svg-container {
-    padding: 6px 5px 6px 15px;
-    color: #889aa4;
-    vertical-align: middle;
-    width: 30px;
-    display: inline-block;
-  }
-
-  .title-container {
-    position: relative;
-
-    .title {
-      font-size: 26px;
-      color: #eee;
-      margin: 0px auto 40px auto;
-      text-align: center;
-      font-weight: bold;
     }
   }
 
   .show-pwd {
     position: absolute;
     right: 10px;
-    top: 7px;
+    top: 2px;
     font-size: 16px;
     color: #889aa4;
     cursor: pointer;
     user-select: none;
-  }
-
-  .thirdparty-button {
-    position: absolute;
-    right: 0;
-    bottom: 6px;
-  }
-
-  @media only screen and (max-width: 470px) {
-    .thirdparty-button {
-      display: none;
-    }
   }
 }
 </style>

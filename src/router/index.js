@@ -1,9 +1,12 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-// 进度条
+import store from "../store/index";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css"; // progress bar style
 import Login from "@/views/Login";
+import { findRouteList } from "@/api/api";
+import { getToken } from "@/utils/cookies";
+
 NProgress.configure({ showSpinner: false }); // NProgress Configuration
 
 // hack router push callback
@@ -37,29 +40,6 @@ const routes = [
   },
 ];
 
-// 动态路由
-const asyncRouter = [
-  {
-    path: "/a",
-    name: "a",
-    component: () => import("../views/AboutView.vue"),
-  },
-  {
-    path: "/h",
-    name: "h",
-    component: () => import("../views/HomeView.vue"),
-  },
-];
-
-// 模拟请求
-const findRouteList = function () {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(asyncRouter);
-    }, 300);
-  });
-};
-
 const router = new VueRouter({
   routes,
   scrollBehavior: () => ({ y: 0 }),
@@ -71,7 +51,14 @@ const whiteList = ["/", "/login"]; // 免登录白名单
 async function addRouteList(to, from, next) {
   // 添加动态路由
   if (!isAddRouter) {
-    const routeList = await findRouteList();
+    const asyncRouter = await findRouteList();
+    console.log("结果=>", asyncRouter);
+
+    let routeList = asyncRouter.list;
+    store.commit("updateMenuList", routeList);
+
+    routeList = generateRouter(routeList);
+
     routeList.forEach((i) => {
       router.addRoute(i);
     });
@@ -91,7 +78,7 @@ router.beforeEach(async (to, from, next) => {
     next();
   } else {
     // 检查权限
-    const authentication = localStorage.getItem("status");
+    const authentication = getToken();
 
     if (authentication) {
       addRouteList(to, from, next);
@@ -116,4 +103,21 @@ router.afterEach((to) => {
     document.title = to.meta.title;
   }
 });
+// 路由拼接
+function generateRouter(userRouter) {
+  const newRouters = userRouter.map((r) => {
+    let routes = {
+      path: r.path,
+      name: r.name,
+    };
+    if (r.component) {
+      routes.component = (resolve) => require([`@/${r.component}`], resolve);
+    }
+    if (r.children) {
+      routes.children = generateRouter(r.children);
+    }
+    return routes;
+  });
+  return newRouters;
+}
 export default router;

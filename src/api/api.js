@@ -1,5 +1,21 @@
 import axios from "./axios";
 import QS from "qs";
+
+export function findRouteList(parameter) {
+  return axios({
+    url: "api/route/list",
+    method: "get",
+    params: parameter,
+  });
+}
+export function login(parameter) {
+  return axios({
+    url: "api/login",
+    method: "get",
+    params: parameter,
+  });
+}
+
 //开票记录
 export function getApplyRecordList(parameter) {
   return axios({

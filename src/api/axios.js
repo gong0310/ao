@@ -1,18 +1,8 @@
 import axios from "axios";
 import router from "../router/index.js";
-import { Toast } from "vant";
-import Vue from "vue";
-/**
- * 提示函数
- * 禁止点击蒙层、显示一秒后关闭
- */
-const tip = (msg) => {
-  Toast({
-    message: msg,
-    duration: 3000,
-    forbidClick: true,
-  });
-};
+import { CANEAL_TOCKEN_STATUS } from "@/utils/const.js";
+import { getToken, removeToken } from "@/utils/cookies";
+
 /**
  * 跳转登录页
  * 携带当前页面路由，以期在登录页面完成登录后返回当前页面
@@ -26,33 +16,28 @@ const toLogin = () => {
     },
   });
 };
-
 const errorHandle = (status, msg) => {
+  console.log("errorHandle", status, msg);
   // 状态码判断
   switch (status) {
     // 401: 未登录状态，跳转登录页
     case 401:
-      tip("未登录或登录状态失效");
       setTimeout(() => {
         toLogin();
-      }, 1000);
-      break;
-    // 403 token过期
-    // 清除token并跳转登录页
+      }, 300);
+      return msg || "未登录或登录状态失效";
+    // 403 token过期，清除token并跳转登录页
     case 403:
-      tip("登录过期，请重新登录");
-      Vue.ls.remove("ACCESS_TOKEN");
+      removeToken();
       setTimeout(() => {
         toLogin();
-      }, 1000);
-      break;
+      }, 300);
+      return msg || "登录过期，请重新登录";
     // 404请求不存在
     case 404:
-      tip("请求的资源不存在");
-      break;
+      return msg || "请求的资源不存在";
     default:
-      tip("接口解析错误");
-      console.log(status, msg);
+      return msg || "接口解析错误";
   }
 };
 
@@ -89,7 +74,6 @@ const removePending = (config) => {
     JSON.stringify(config.params),
     JSON.stringify(config.data),
   ].join("&");
-  console.log("url=", url);
   if (pending.has(url)) {
     // 如果在 pending 中存在当前请求标识，需要取消当前请求，并且移除
     const cancel = pending.get(url);
@@ -109,21 +93,22 @@ export const clearPending = () => {
 
 // 创建axios实例
 var instance = axios.create({
-  baseURL: "http://api-hmugo-web.itheima.net/api/",
+  baseURL: "https://www.baidu.com/",
   timeout: 1000 * 10,
-  // headers: {
-  //     'X-Requested-with': 'XMLHttpRequest'
-  // }
+  headers: {
+    "X-Requested-with": "XMLHttpRequest",
+  },
 });
 // 设置post请求头
-// instance.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
+instance.defaults.headers.post["Content-Type"] =
+  "application/x-www-form-urlencoded";
 /**
  * 请求拦截器
  * 每次请求前，如果存在token则在请求头中携带token
  */
 instance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("status");
+    const token = getToken();
     if (token) {
       config.headers["Authorization"] = "Bearer " + token; // 让每个请求携带自定义 token 请根据实际情况自行修改
     }
@@ -150,25 +135,26 @@ instance.interceptors.response.use(
           resp,
         });
       }
-      Promise.resolve(retData);
+      return Promise.resolve(retData.data);
     }
   },
-  // 请求失败
   (error) => {
+    removePending(error.config || {});
+
+    if (axios.isCancel(error)) {
+      console.log("已取消的重复请求：" + error.message);
+      return Promise.reject({
+        status: CANEAL_TOCKEN_STATUS,
+        msg: "取消重复请求",
+      });
+    }
     const { response } = error;
     if (response) {
       // 请求已发出，但是不在2xx的范围
-      errorHandle(response.status, response.data.message);
-      return Promise.reject(response);
-    } else {
-      // 处理断网的情况
-      if (!window.navigator.onLine) {
-        // tip('网络开小差了~')
-        return Promise.reject("网络开小差了~");
-      }
-      router.push("/error");
-      return Promise.reject(error);
+      const message = errorHandle(response.status, response.data.message);
+      return Promise.reject(message);
     }
+    return Promise.reject(error);
   }
 );
 

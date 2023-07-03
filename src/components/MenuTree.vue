@@ -4,17 +4,13 @@
       <el-submenu :key="menu.id" :index="menu.path" v-if="menu.children">
         <template slot="title">
           <i :class="menu.icon"></i>
-          <span :style="isCollapse ? 'opacity: 0;' : ''" slot="title">{{
-            menu.name
-          }}</span>
+          <span slot="title">{{ menu.name }}</span>
         </template>
         <menu-tree :menuData="menu.children"></menu-tree>
       </el-submenu>
       <el-menu-item :key="menu.id" :index="menu.path" v-else>
         <i :class="menu.icon"></i>
-        <span :style="isCollapse ? 'opacity: 0;' : ''" slot="title">{{
-          menu.name
-        }}</span>
+        <span slot="title">{{ menu.name }}</span>
       </el-menu-item>
     </template>
   </div>
@@ -35,3 +31,13 @@ export default {
   name: "MenuTree",
 };
 </script>
+<style scoped>
+/*隐藏文字*/
+.el-menu--collapse .el-submenu__title span {
+  display: none;
+}
+/*隐藏 > */
+.el-menu--collapse .el-submenu__title .el-submenu__icon-arrow {
+  display: none;
+}
+</style>

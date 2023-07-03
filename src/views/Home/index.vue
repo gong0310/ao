@@ -12,33 +12,15 @@
         active-text-color="#ea5420"
         unique-opened
         :collapse="isCollapse"
-        :collapse-transition="false"
+        :collapse-transition="true"
         :router="true"
         :default-active="activePath"
+        @select="handleSelectMenu"
       >
-        <!-- 引入组件 -->
-        <menu-tree :isCollapse="isCollapse" :menuData="menuList"></menu-tree>
-        <!-- <el-submenu
-          :index="item.id + ''"
-          v-for="item in menuList"
-          :key="item.id"
-        >
-          <template slot="title">
-            <i :class="item.icon"></i>
-            <span>{{ item.authName }}</span>
-          </template>
-          <el-menu-item
-            :index="'/' + subItem.path"
-            v-for="subItem in item.children"
-            :key="subItem.id"
-            @click="saveState('/' + subItem.path)"
-          >
-            <template slot="title">
-              <i :class="item.icon"></i>
-              <span>{{ subItem.authName }}</span>
-            </template>
-          </el-menu-item>
-        </el-submenu> -->
+        <menu-tree
+          :isCollapse="isCollapse"
+          :menuData="$store.state.menuList"
+        ></menu-tree>
       </el-menu>
     </el-aside>
     <!-- 页面主体区域 -->
@@ -47,11 +29,11 @@
       <el-header>
         <div
           class="home-container-toggle"
-          @click="toggle"
+          @click="handleToggleCollapse"
           :class="isCollapse ? 'el-icon-s-unfold' : 'el-icon-s-fold'"
         ></div>
         <el-dropdown>
-          <i class="el-icon-setting" style="margin-right: 15px"></i>
+          <i class="el-icon-setting"></i>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item><span>退出登录</span></el-dropdown-item>
             <el-dropdown-item><span>关联店铺</span></el-dropdown-item>
@@ -76,56 +58,18 @@ export default {
   data() {
     return {
       isCollapse: false,
-      activePath: "c",
-      menuList: [
-        {
-          path: "/a",
-          name: "a",
-          id: "1",
-          authName: "a",
-          icon: "el-icon-picture",
-          component: () => import("@/views/AboutView.vue"),
-          children: [
-            {
-              path: "a",
-              name: "a",
-              id: "2",
-              authName: "a1",
-              icon: "el-icon-phone",
-              component: () => import("@/views/AboutView.vue"),
-              children: [
-                {
-                  path: "c",
-                  name: "c",
-                  id: "4",
-                  authName: "a1",
-                  icon: "el-icon-phone",
-                  component: () => import("@/views/AboutView.vue"),
-                },
-              ],
-            },
-          ],
-        },
-        {
-          path: "/h",
-          name: "h",
-          id: "3",
-          authName: "h",
-          icon: "el-icon-edit",
-          component: () => import("@/views/HomeView.vue"),
-        },
-      ],
+      activePath: "",
     };
   },
   mounted() {
-    // this.activePath = window.sessionStorage.getItem("activePath");
+    this.activePath = window.sessionStorage.getItem("activePath");
   },
   methods: {
-    toggle() {
+    handleToggleCollapse() {
       this.isCollapse = !this.isCollapse;
     },
-    saveState(activePath) {
-      // window.sessionStorage.setItem("activePath", activePath);
+    handleSelectMenu(activePath) {
+      window.sessionStorage.setItem("activePath", activePath);
       this.activePath = activePath;
     },
   },
@@ -176,20 +120,25 @@ export default {
   }
 }
 .el-menu {
-  overflow: hidden;
-  border-right: 0;
+  border: none;
   .el-menu-item:hover {
     background-color: #fafafa !important;
   }
 }
+.el-menu:not(.el-menu--collapse) {
+  width: 200px;
+}
 .el-aside {
-  transition-property: width;
-  transition-duration: 0.25s, 0.5s;
+  height: 100vh;
+  overflow-x: hidden;
+  transition: all 0.3s;
+  transition-timing-function: ease-in-out;
   background-color: aquamarine;
 }
 
 .el-icon-setting {
   font-size: 22px;
   color: #ffffff;
+  margin-right: 15px;
 }
 </style>
