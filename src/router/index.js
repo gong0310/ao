@@ -33,11 +33,6 @@ const routes = [
       title: "登录",
     },
   },
-  {
-    path: "/home",
-    component: () => import(/* webpackChunkName: "home" */ "../views/Home"),
-    meta: { title: "首页" },
-  },
 ];
 
 const router = new VueRouter({
@@ -45,21 +40,49 @@ const router = new VueRouter({
   scrollBehavior: () => ({ y: 0 }),
 });
 
+let commonRoute = [
+  {
+    // 到时候单独拎出来，进行addrouter
+    path: "/home",
+    name: "首页",
+    component: "views/Home",
+    icon: "el-icon-menu",
+    meta: { title: "首页" },
+    children: [],
+  },
+];
 let isAddRouter = false; // 是否添加过路由
 const whiteList = ["/", "/login"]; // 免登录白名单
 
 async function addRouteList(to, from, next) {
   // 添加动态路由
   if (!isAddRouter) {
-    const asyncRouter = await findRouteList();
-    console.log("结果=>", asyncRouter);
+    // const asyncRouter = await findRouteList();
+    // console.log("结果=>", asyncRouter);
 
-    let routeList = asyncRouter.list;
-    store.commit("updateMenuList", routeList);
+    // let routeList = asyncRouter.list;
+    let routeList = [
+      {
+        path: "/a",
+        name: "a",
+        icon: "el-icon-menu",
+        component: "views/AboutView",
+      },
+      {
+        path: "/b",
+        name: "b",
+        icon: "el-icon-menu",
+        component: "views/HomeView",
+      },
+    ];
+    commonRoute[0].children = routeList; // home下
+    commonRoute.push(...routeList); // 其他页面下
 
-    routeList = generateRouter(routeList);
+    store.commit("updateMenuList", commonRoute);
 
-    routeList.forEach((i) => {
+    commonRoute = generateRouter(commonRoute);
+
+    commonRoute.forEach((i) => {
       router.addRoute(i);
     });
     isAddRouter = true;
@@ -78,7 +101,7 @@ router.beforeEach(async (to, from, next) => {
     next();
   } else {
     // 检查权限
-    const authentication = getToken();
+    const authentication = getToken() || "xxx";
 
     if (authentication) {
       addRouteList(to, from, next);

@@ -21,7 +21,6 @@
           placeholder="Username"
           name="username"
           type="text"
-          tabindex="1"
           autocomplete="on"
         />
       </el-form-item>
@@ -34,17 +33,19 @@
           :type="passwordType"
           placeholder="Password"
           name="password"
-          tabindex="2"
           autocomplete="on"
           @keyup.enter.native="handleLogin"
-        />
-        <span class="show-pwd" @click="handleChangePwdIcon">
+        >
+          <el-button slot="append" type="primary">获取验证码</el-button>
           <i
+            @click="handleChangePwdIcon"
+            slot="suffix"
+            class="show-pwd"
             :class="
               passwordType === 'password' ? 'el-icon-lock' : 'el-icon-unlock'
             "
           />
-        </span>
+        </el-input>
       </el-form-item>
       <el-form-item>
         <el-button
@@ -111,7 +112,7 @@ export default {
           let resp;
 
           try {
-            resp = await login(req);
+            // resp = await login(req);
           } catch (error) {
             if (error.status !== CANEAL_TOCKEN_STATUS) {
               this.$message.error(error);
@@ -122,8 +123,8 @@ export default {
           console.log("login resp=>", resp);
 
           // 请求登录成功
-          this.$store.commit("updateUserInfo", resp.user_info);
-          this.$store.commit("updatetoken", resp.token);
+          // this.$store.commit("updateUserInfo", resp.user_info);
+          // this.$store.commit("updatetoken", resp.token);
           this.$router.push(this.$route.query.redirect || "/home");
           this.loginLoading = false;
         } else {
@@ -173,12 +174,15 @@ export default {
 
   .show-pwd {
     position: absolute;
-    right: 10px;
-    top: 2px;
+    right: 5px;
+    top: 10px;
     font-size: 16px;
     color: #889aa4;
     cursor: pointer;
     user-select: none;
   }
+}
+::v-deep .el-input__suffix {
+  transition: none;
 }
 </style>
