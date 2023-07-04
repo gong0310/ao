@@ -4,7 +4,9 @@
     <el-aside :width="isCollapse ? '64px' : '200px'">
       <div class="home-container-logo">
         <img v-if="isCollapse" src="@/assets/logo.png" alt="" />
-        <span v-else>后台数据管理</span>
+        <span v-else @click="handleClipboard('哈哈哈', $event)"
+          >后台数据管理</span
+        >
       </div>
       <el-menu
         background-color="#fff"
@@ -36,7 +38,7 @@
           <i class="el-icon-setting"></i>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item><span>退出登录</span></el-dropdown-item>
-            <el-dropdown-item><span>关联店铺</span></el-dropdown-item>
+            <el-dropdown-item><span>复制</span></el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
       </el-header>
@@ -49,7 +51,7 @@
 </template>
 <script>
 import MenuTree from "@/components/MenuTree.vue";
-
+import clipboard from "@/utils/clipboard";
 export default {
   name: "Home",
   components: {
@@ -71,6 +73,9 @@ export default {
     handleSelectMenu(activePath) {
       window.sessionStorage.setItem("activePath", activePath);
       this.activePath = activePath;
+    },
+    handleClipboard(text, event) {
+      clipboard(text, event);
     },
   },
 };

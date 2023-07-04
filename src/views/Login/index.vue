@@ -61,7 +61,7 @@
 </template>
 <script>
 import { login } from "@/api/api";
-import { CANEAL_TOCKEN_STATUS } from "@/utils/const.js";
+import { CANEAL_TOCKEN_STATUS } from "@/utils/common-def";
 
 export default {
   name: "Login",
@@ -112,7 +112,7 @@ export default {
           let resp;
 
           try {
-            // resp = await login(req);
+            resp = await login(req);
           } catch (error) {
             if (error.status !== CANEAL_TOCKEN_STATUS) {
               this.$message.error(error);
@@ -123,8 +123,8 @@ export default {
           console.log("login resp=>", resp);
 
           // 请求登录成功
-          // this.$store.commit("updateUserInfo", resp.user_info);
-          // this.$store.commit("updatetoken", resp.token);
+          this.$store.commit("updateUserInfo", resp.user_info);
+          this.$store.commit("updatetoken", resp.token);
           this.$router.push(this.$route.query.redirect || "/home");
           this.loginLoading = false;
         } else {

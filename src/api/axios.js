@@ -1,7 +1,7 @@
 import axios from "axios";
 import router from "../router/index.js";
-import { CANEAL_TOCKEN_STATUS } from "@/utils/const.js";
-import { getToken, removeToken } from "@/utils/cookies";
+import { CANEAL_TOCKEN_STATUS } from "@/utils/common-def.js";
+import { getToken, removeToken } from "@/utils/common-func.js";
 
 /**
  * 跳转登录页
@@ -93,7 +93,7 @@ export const clearPending = () => {
 
 // 创建axios实例
 var instance = axios.create({
-  baseURL: "https://www.baidu.com/",
+  baseURL: process.env.VUE_APP_BASE_API,
   timeout: 1000 * 10,
   headers: {
     "X-Requested-with": "XMLHttpRequest",

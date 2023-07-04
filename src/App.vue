@@ -16,17 +16,17 @@ export default {
     return {};
   },
   mounted() {
-    if (window.localStorage.getItem("store")) {
+    if (sessionStorage.getItem("store")) {
       this.$store.replaceState(
         Object.assign(
           {},
           this.$store.state,
-          JSON.parse(window.localStorage.getItem("store"))
+          JSON.parse(sessionStorage.getItem("store"))
         )
       );
     }
     window.addEventListener("beforeunload", () => {
-      localStorage.setItem("store", JSON.stringify(this.$store.state));
+      sessionStorage.setItem("store", JSON.stringify(this.$store.state));
     });
   },
 };

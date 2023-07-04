@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import { setToken } from "@/utils/cookies";
+import { setToken } from "@/utils/common-func";
 
 const MockAxios = (data) => {
   return new Promise((res) => {

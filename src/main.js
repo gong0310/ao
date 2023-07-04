@@ -5,7 +5,9 @@ import store from "./store";
 import "./styles/index.scss";
 import Element from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
+import firective from "./directive/index";
 
+Vue.use(firective);
 Vue.config.productionTip = false;
 
 Vue.use(Element, {

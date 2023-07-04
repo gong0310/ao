@@ -5,7 +5,7 @@ import NProgress from "nprogress";
 import "nprogress/nprogress.css"; // progress bar style
 import Login from "@/views/Login";
 import { findRouteList } from "@/api/api";
-import { getToken } from "@/utils/cookies";
+import { getToken } from "@/utils/common-func";
 
 NProgress.configure({ showSpinner: false }); // NProgress Configuration
 
@@ -57,26 +57,13 @@ const whiteList = ["/", "/login"]; // 免登录白名单
 async function addRouteList(to, from, next) {
   // 添加动态路由
   if (!isAddRouter) {
-    // const asyncRouter = await findRouteList();
-    // console.log("结果=>", asyncRouter);
+    const asyncRouter = await findRouteList();
+    console.log("结果=>", asyncRouter);
 
-    // let routeList = asyncRouter.list;
-    let routeList = [
-      {
-        path: "/a",
-        name: "a",
-        icon: "el-icon-menu",
-        component: "views/AboutView",
-      },
-      {
-        path: "/b",
-        name: "b",
-        icon: "el-icon-menu",
-        component: "views/HomeView",
-      },
-    ];
+    let routeList = asyncRouter.list;
+
     commonRoute[0].children = routeList; // home下
-    commonRoute.push(...routeList); // 其他页面下
+    // commonRoute.push(...routeList); // 其他页面下
 
     store.commit("updateMenuList", commonRoute);
 
@@ -101,7 +88,7 @@ router.beforeEach(async (to, from, next) => {
     next();
   } else {
     // 检查权限
-    const authentication = getToken() || "xxx";
+    const authentication = getToken();
 
     if (authentication) {
       addRouteList(to, from, next);
