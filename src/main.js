@@ -6,6 +6,7 @@ import "./styles/index.scss";
 import Element from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
 import firective from "./directive/index";
+import "./assets/iconfont/iconfont.css";
 
 Vue.use(firective);
 Vue.config.productionTip = false;

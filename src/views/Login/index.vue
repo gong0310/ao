@@ -100,7 +100,7 @@ export default {
   },
   mounted() {},
   methods: {
-    handleLogin() {
+    async handleLogin() {
       this.$refs.loginForm.validate(async (valid) => {
         if (valid) {
           this.loginLoading = true;
@@ -131,6 +131,7 @@ export default {
           return false;
         }
       });
+      return;
     },
     handleChangePwdIcon() {
       if (this.passwordType === "password") {
